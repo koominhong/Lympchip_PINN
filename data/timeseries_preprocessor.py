@@ -56,21 +56,9 @@ class TimeSeriesPreprocessor:
         'sigma_ve': {'low': 0.1, 'mid': 0.5, 'high': 0.9, 'scale': 'linear'},
         'D_gel': {'low': 1e-11, 'mid': 3e-11, 'high': 1e-10, 'scale': 'log'},
         'kdecay': {'low': 0, 'mid': 1.7e-6, 'high': 1.5e-5, 'scale': 'log_zero'},
-        # 분자량 추가 (5.8 kDa ~ 150 kDa, 로그 스케일)
-        'MW': {'low': 5.8, 'mid': 66.5, 'high': 150, 'scale': 'log'},
     }
 
-    PARAM_ORDER = ['Lp_ve', 'K', 'P_oncotic', 'sigma_ve', 'D_gel', 'kdecay', 'MW']
-
-    # sol765 약물별 기본 파라미터 (컬럼 헤더에서 파싱한 값)
-    SOL765_DRUG_PARAMS = {
-        'IgG': {'MW': 150, 'sigma_ve': 0.9, 'D_gel': 4.5e-11, 'p_ve': 1e-9},
-        'INS': {'MW': 5.8, 'sigma_ve': 0.1, 'D_gel': 9.4e-11, 'p_ve': 1e-8},
-        'ALB': {'MW': 66.5, 'sigma_ve': 0.7, 'D_gel': 6.2e-11, 'p_ve': 1e-9},
-    }
-
-    # Injection site 기본 분자량 (명시되지 않음, IgG와 유사한 크기로 가정)
-    INJECTION_SITE_DEFAULT_MW = 150.0
+    PARAM_ORDER = ['Lp_ve', 'K', 'P_oncotic', 'sigma_ve', 'D_gel', 'kdecay']
 
     def __init__(self, data_dir: str = None):
         if data_dir is None:
@@ -165,9 +153,6 @@ class TimeSeriesPreprocessor:
                     norm_val = self.normalize_param(params[param_name], param_name)
                 elif param_name == 'kdecay':
                     norm_val = -1.0  # injection site는 decay 없음
-                elif param_name == 'MW':
-                    # Injection site는 MW 정보 없음 → 기본값 사용
-                    norm_val = self.normalize_param(self.INJECTION_SITE_DEFAULT_MW, 'MW')
                 else:
                     norm_val = 0.0  # mid 값
                 params_normalized.append(norm_val)
@@ -328,17 +313,11 @@ class TimeSeriesPreprocessor:
                 ts_df = pd.DataFrame(time_series_data)
                 ts_df = ts_df.sort_values('time_hour').reset_index(drop=True)
 
-                # 약물 종류에 따른 실제 파라미터 값 사용
-                drug_params = self.SOL765_DRUG_PARAMS.get(drug_type, {})
-
-                # 정규화된 파라미터 생성 (약물별 실제 파라미터 사용)
+                # 정규화된 파라미터 생성
                 params_normalized = []
                 for param_name in self.PARAM_ORDER:
                     if param_name == 'kdecay':
                         norm_val = self.normalize_param(kdecay, 'kdecay')
-                    elif param_name in drug_params:
-                        # 약물별 실제 파라미터 값 사용
-                        norm_val = self.normalize_param(drug_params[param_name], param_name)
                     else:
                         norm_val = 0.0  # mid 값
                     params_normalized.append(norm_val)
@@ -347,8 +326,7 @@ class TimeSeriesPreprocessor:
                     'drug_type': drug_type,
                     'kdecay': kdecay,
                     'params_normalized': np.array(params_normalized),
-                    'time_series': ts_df,
-                    'actual_params': drug_params  # 디버깅용
+                    'time_series': ts_df
                 }
 
         return decay_data

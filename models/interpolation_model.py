@@ -20,30 +20,10 @@ class CaseInterpolator:
     새로운 파라미터에 대해 가장 가까운 케이스들을 가중 평균
     """
 
-    # 파라미터별 영향력 가중치 (실제 데이터 분석 기반)
-    # 영향력 순위: D_gel(118%p) > Lp_ve(87.5%p) > P_oncotic(87.3%p) > sigma_ve(28.3%p) > K(24.1%p)
-    # 정규화된 가중치 (최대 영향력 = 1.0 기준)
-    PARAM_IMPORTANCE_WEIGHTS = {
-        'Lp_ve': 0.74,      # 87.5 / 118.3 = 0.74 (2위)
-        'K': 0.20,          # 24.1 / 118.3 = 0.20 (5위, 가장 둔감)
-        'P_oncotic': 0.74,  # 87.3 / 118.3 = 0.74 (3위)
-        'sigma_ve': 0.24,   # 28.3 / 118.3 = 0.24 (4위)
-        'D_gel': 1.0,       # 118.3 / 118.3 = 1.00 (1위, 가장 민감)
-        'kdecay': 0.50,     # Decay 영향 (추정치)
-        'MW': 0.60,         # 분자량 영향 (sigma_ve와 연동, 추정치)
-    }
-
-    def __init__(self, use_param_weights: bool = True):
+    def __init__(self):
         self.cases = {}  # case_name -> {'params': np.array, 'time_series': DataFrame}
-        self.param_names = ['Lp_ve', 'K', 'P_oncotic', 'sigma_ve', 'D_gel', 'kdecay', 'MW']
+        self.param_names = ['Lp_ve', 'K', 'P_oncotic', 'sigma_ve', 'D_gel', 'kdecay']
         self.time_max = 72.0
-        self.use_param_weights = use_param_weights
-
-        # 파라미터 순서에 맞춰 가중치 배열 생성
-        self.param_weights = np.array([
-            self.PARAM_IMPORTANCE_WEIGHTS.get(name, 0.5)
-            for name in self.param_names
-        ])
 
     def add_case(self, case_name: str, params_normalized: np.ndarray, time_series: pd.DataFrame):
         """케이스 데이터 추가"""
@@ -70,30 +50,11 @@ class CaseInterpolator:
         """
         쿼리 파라미터에 대한 각 케이스의 가중치 계산
         거리 기반 역가중치 (Inverse Distance Weighting)
-
-        파라미터별 영향력 가중치 적용:
-        - D_gel(1.0) > Lp_ve(0.74) > P_oncotic(0.74) > sigma_ve(0.24) > K(0.20)
-        - 영향력이 큰 파라미터의 차이가 거리 계산에서 더 크게 반영됨
         """
         distances = []
         for case_name, case_data in self.cases.items():
             diff = query_params - case_data['params']
-
-            # 파라미터 차원 맞추기
-            if len(diff) > len(self.param_weights):
-                weights = np.concatenate([self.param_weights, np.ones(len(diff) - len(self.param_weights)) * 0.5])
-            elif len(diff) < len(self.param_weights):
-                weights = self.param_weights[:len(diff)]
-            else:
-                weights = self.param_weights
-
-            # 가중치 적용된 거리 계산
-            if self.use_param_weights:
-                weighted_diff = diff * weights
-                dist = np.linalg.norm(weighted_diff)
-            else:
-                dist = np.linalg.norm(diff)
-
+            dist = np.linalg.norm(diff)
             distances.append((case_name, dist))
 
         # 거리순 정렬

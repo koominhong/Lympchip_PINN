@@ -122,22 +122,13 @@ PARAM_RANGES = {
         'scale': 'log_zero',  # 0을 허용하는 특수 로그 스케일
         'description': '약물 분해 속도 상수 (0=분해 없음)'
     },
-    'MW': {
-        'name': 'MW (분자량)',
-        'unit': 'kDa',
-        'low': 5.8,
-        'mid': 66.5,
-        'high': 150,
-        'scale': 'log',
-        'description': '약물 분자량 (INS=5.8, ALB=66.5, IgG=150 kDa)'
-    }
 }
 
-# 파라미터 순서 (보간기와 일치 - MW 추가)
-PARAM_ORDER = ['Lp_ve', 'K', 'P_oncotic', 'sigma_ve', 'D_gel', 'kdecay', 'MW']
+# 파라미터 순서 (보간기와 일치)
+PARAM_ORDER = ['Lp_ve', 'K', 'P_oncotic', 'sigma_ve', 'D_gel', 'kdecay']
 
 # 시계열 예측용 파라미터 순서 (보간기와 동일)
-TS_PARAM_ORDER = ['Lp_ve', 'K', 'P_oncotic', 'sigma_ve', 'D_gel', 'kdecay', 'MW']
+TS_PARAM_ORDER = ['Lp_ve', 'K', 'P_oncotic', 'sigma_ve', 'D_gel', 'kdecay']
 
 
 # ============== 데이터 로드 함수 ==============
@@ -546,7 +537,7 @@ def predict_with_interpolator(interpolator, params_normalized, time_max=72.0, n_
     })
 
 
-INTERPOLATOR_VERSION = "v2.1_MW"  # 버전 변경 시 캐시 갱신 (MW 파라미터 추가)
+INTERPOLATOR_VERSION = "v2.0"  # 버전 변경 시 캐시 갱신
 
 @st.cache_resource(show_spinner="보간기 로딩 중...")
 def load_interpolator(version=INTERPOLATOR_VERSION):
@@ -1494,16 +1485,6 @@ def page_help():
     | **D ↑** | 평형 도달 속도 증가 |
     | **σ ↑** | 용질 투과 감소, Blood ↓ |
     | **kdecay ↑** | Decay ↑ (약물 분해 증가) |
-    | **MW ↓** | Blood ↑ (작은 분자가 혈관 통과 용이) |
-    | **MW ↑** | Lymph ↑ (큰 분자는 림프로 제거) |
-
-    ### 💊 약물별 분자량 참고
-
-    | 약물 | 분자량 (kDa) | 특성 |
-    |------|-------------|------|
-    | **INS (인슐린)** | 5.8 | 작은 분자 → Blood 80% |
-    | **ALB (알부민)** | 66.5 | 중간 분자 → Lymph 70% |
-    | **IgG (항체)** | 150 | 큰 분자 → Lymph 67% |
     """)
 
 
