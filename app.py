@@ -843,11 +843,12 @@ def calculate_auc(df: pd.DataFrame) -> dict:
     """
     time = df['time_hour'].values
 
-    # 사다리꼴 적분 (numpy trapz 사용)
-    auc_blood = np.trapz(df['Blood'].values, time)
-    auc_lymph = np.trapz(df['Lymph'].values, time)
-    auc_ecm = np.trapz(df['ECM'].values, time)
-    auc_decay = np.trapz(df['Decay'].values, time) if 'Decay' in df.columns else 0
+    # 사다리꼴 적분 (numpy 버전 호환)
+    trapz_func = np.trapezoid if hasattr(np, 'trapezoid') else np.trapz
+    auc_blood = trapz_func(df['Blood'].values, time)
+    auc_lymph = trapz_func(df['Lymph'].values, time)
+    auc_ecm = trapz_func(df['ECM'].values, time)
+    auc_decay = trapz_func(df['Decay'].values, time) if 'Decay' in df.columns else 0
 
     return {
         'Blood': auc_blood,
