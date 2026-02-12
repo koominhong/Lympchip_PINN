@@ -39,7 +39,7 @@ class LymphChipPreprocessor:
     """림프칩 시뮬레이션 데이터 전처리기"""
 
     def __init__(self, data_dir: str = None):
-        self.data_dir = Path(data_dir) if data_dir else Path(__file__).parent.parent.parent
+        self.data_dir = Path(data_dir) if data_dir else Path(__file__).parent
         self.feature_scaler = StandardScaler()
         self.target_scaler = MinMaxScaler()
 

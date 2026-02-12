@@ -62,7 +62,7 @@ class TimeSeriesPreprocessor:
 
     def __init__(self, data_dir: str = None):
         if data_dir is None:
-            self.data_dir = Path(__file__).parent.parent.parent
+            self.data_dir = Path(__file__).parent
         else:
             self.data_dir = Path(data_dir)
 

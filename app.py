@@ -27,7 +27,7 @@ from models.interpolation_model import CaseInterpolator, create_interpolator_fro
 from models.losses import compute_metrics
 
 # 데이터 경로
-DATA_DIR = Path("/Users/guminhong/lympchip_agent")
+DATA_DIR = Path(__file__).parent / "data"
 
 # 페이지 설정
 st.set_page_config(
