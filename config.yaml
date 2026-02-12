@@ -1,0 +1,54 @@
+# 림프칩 PINN 설정 파일
+
+# 데이터 설정
+data:
+  data_dir: ".."  # 엑셀 파일 위치 (상위 디렉토리)
+  batch_size: 32
+  test_split: 0.2
+  random_seed: 42
+
+# 모델 설정
+model:
+  type: "pinn"  # pinn, multitask, deeponet
+  hidden_dim: 256
+  num_layers: 6
+  dropout: 0.1
+  use_time_encoding: true
+  num_time_frequencies: 10
+
+# 학습 설정
+training:
+  num_epochs: 200
+  learning_rate: 0.001
+  weight_decay: 0.00001
+  early_stopping_patience: 30
+  gradient_clip: 1.0
+
+  # 스케줄러
+  scheduler:
+    type: "cosine_warm_restarts"
+    T_0: 50
+    T_mult: 2
+    eta_min: 0.000001
+
+# 손실 함수 가중치
+loss:
+  lambda_data: 1.0
+  lambda_physics: 0.1
+  lambda_conservation: 0.5
+  lambda_monotonic: 0.05
+  lambda_boundary: 0.1
+  lambda_smoothness: 0.01
+
+# 작업 설정
+task:
+  type: "concentration"  # concentration, ratios, both
+
+# 출력 설정
+output:
+  checkpoint_dir: "./checkpoints"
+  results_dir: "./results"
+  log_interval: 10
+
+# 디바이스 설정
+device: "auto"  # auto, cpu, cuda, mps

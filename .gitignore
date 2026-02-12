@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Virtual Environment
+venv/
+env/
+.env
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Cache
+*.pkl
+.cache/
+interpolator_cache/
+
+# Model checkpoints (선택: 용량이 크면 제외)
+# checkpoints/*.pt
+
+# 로그
+*.log
+logs/
+
+# 임시 파일
+*.tmp
+*.temp
